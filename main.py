@@ -38,12 +38,12 @@ def dummy_data(garage):
 
 dummy_data(my_garage)
 
-@app.get("/vehicles")
+@app.get("/vehicles", tags=["Garage"])
 def get_all_vehicles():
     vehicles = [v.__dict__ for v in my_garage.get_all_veh()]
     return {"vehicles": vehicles}
 
-@app.get("/vehicles/{id}")
+@app.get("/vehicles/{id}", tags=["Garage"])
 def get_vehicle(id: int):
     vehicle = my_garage.find_vehicle(id)
     if vehicle is None:
@@ -51,7 +51,7 @@ def get_vehicle(id: int):
     return {"vehicle": vehicle}
 
 
-@app.post("/vehicles")
+@app.post("/vehicles", tags=["Garage"])
 def add_new_vehicles(payload: VehicleCreate):
     if payload.vehicle_type == "Motorcycle":
         obj_veh = Motorcycle(id=None, name=payload.name, cc=payload.cc, license_plate=payload.license_plate, transmission=payload.transmission)
@@ -64,7 +64,7 @@ def add_new_vehicles(payload: VehicleCreate):
             "id": new_vehicle.id,
             "detail": new_vehicle.get_info()}
 
-@app.delete("/vehicles/{id}")
+@app.delete("/vehicles/{id}", tags=["Garage"])
 def delete_vehicle(id: int):
     try:
         my_garage.remove_vehicle(id)
@@ -73,7 +73,7 @@ def delete_vehicle(id: int):
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
 
-@app.patch("/vehicles/{id}/update_mileage")
+@app.patch("/vehicles/{id}/update_mileage", tags=["Vehicle Management"])
 def update_vehicle_mileage(id: int, new_mileage: Annotated[int, Form()]):
     vehicle = my_garage.find_vehicle(id)
     if vehicle is None:
@@ -85,3 +85,12 @@ def update_vehicle_mileage(id: int, new_mileage: Annotated[int, Form()]):
                     "mileage": f"{vehicle._prev_mileage} => {vehicle._mileage}"}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@app.patch("/vehicles/{id}/update_oil", tags=["Vehicle Management"])
+def update_oil_mileage(id: int):
+    vehicle = my_garage.find_vehicle(id)
+    if vehicle is None:
+        raise HTTPException(status_code=404, detail=f"Vehicle with ID {id} could not be found.")
+    vehicle.oil_update()
+    return {"message": "Succesfully updated vehicle oil mileage",
+            "mileage": f"{vehicle._last_oil_mileage}"}
