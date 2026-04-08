@@ -43,6 +43,14 @@ def get_all_vehicles():
     vehicles = [v.__dict__ for v in my_garage.get_all_veh()]
     return {"vehicles": vehicles}
 
+@app.get("/vehicles/{id}")
+def get_vehicle(id: int):
+    vehicle = my_garage.find_vehicle(id)
+    if vehicle is None:
+        raise HTTPException(status_code=404, detail=f"Vehicle with ID {id} could not be found.")
+    return {"vehicle": vehicle}
+
+
 @app.post("/vehicles")
 def add_new_vehicles(payload: VehicleCreate):
     if payload.vehicle_type == "Motorcycle":
@@ -55,3 +63,14 @@ def add_new_vehicles(payload: VehicleCreate):
     return {"messages": f"{new_vehicle.name} added succesfully",
             "id": new_vehicle.id,
             "detail": new_vehicle.get_info()}
+
+@app.delete("/vehicles/{id}")
+def delete_vehicles(id: int):
+    try:
+        my_garage.remove_vehicle(id)
+        return {"message": f"Vehicle with ID {id} succesfully removed.",
+                "status": "success"}
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f"{e}")
+
+
