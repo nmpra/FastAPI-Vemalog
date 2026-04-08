@@ -82,7 +82,7 @@ def update_vehicle_mileage(id: int, new_mileage: Annotated[int, Form()]):
         new_mil = vehicle.mileage_update(new_mileage)
         if new_mil:
             return {"message": "Succesfully updated vehicle mileage",
-                    "mileage": f"{vehicle._prev_mileage} => {vehicle._mileage}"}
+                    "mileage": f"{vehicle._prev_mileage}km => {vehicle._mileage}km"}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -93,7 +93,7 @@ def update_oil_mileage(id: int):
         raise HTTPException(status_code=404, detail=f"Vehicle with ID {id} could not be found.")
     vehicle.oil_update()
     return {"message": "Succesfully updated vehicle oil mileage",
-            "mileage": f"{vehicle._last_oil_mileage}"}
+            "mileage": f"{vehicle._last_oil_mileage}km"}
 
 @app.get("/vehicles/{id}/oil_status", tags=["Vehicle Management"])
 def vehicle_oil_status(id: int):
@@ -107,3 +107,25 @@ def vehicle_oil_status(id: int):
     else:
         return {"oil status": "Bad",
                 "message": "This vehicle need new engine oil"}
+
+@app.patch("/vehicles/{id}/update_maintenance", tags=["Vehicle Management"])
+def update_vehicle_maintenance(id: int):
+    vehicle = my_garage.find_vehicle(id)
+    if vehicle is None:
+        raise HTTPException(status_code=404, detail=f"Vehicle with ID {id} could not be found.")
+    maintenance = vehicle.maintenance_update()
+    return {"message": "Succesfully updated vehicle maintenance",
+            "mileage": f"{maintenance}km"}
+
+@app.get("/vehicles/{id}/maintenance_status", tags=["Vehicle Management"])
+def vehicle_maintenance_status(id: int):
+    vehicle = my_garage.find_vehicle(id)
+    if vehicle is None:
+        raise HTTPException(status_code=404, detail=f"Vehicle with ID {id} could not be found.")
+    con, status = vehicle.maintenance_status()
+    if con:
+        return {"maintenance status": "Good",
+                "remaining mileage": f"{status}km"}
+    else:
+        return {"maintenance status": "Bad",
+                "message": "This vehicle need to have maintenance"}

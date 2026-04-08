@@ -46,10 +46,10 @@ class Vehicle:
     def maintenance_status(self):
         if (
             self._mileage - self._last_maintenance_mileage
-        ) >= self.maintenance_interval:
+        ) >= self._maintenance_interval:
             return False, None
         else:
-            remaining_mileage = self.maintenance_interval - (
+            remaining_mileage = self._maintenance_interval - (
                 self._mileage - self._last_maintenance_mileage
             )
             return True, remaining_mileage
