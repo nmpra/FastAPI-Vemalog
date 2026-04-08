@@ -94,3 +94,16 @@ def update_oil_mileage(id: int):
     vehicle.oil_update()
     return {"message": "Succesfully updated vehicle oil mileage",
             "mileage": f"{vehicle._last_oil_mileage}"}
+
+@app.get("/vehicles/{id}/oil_status", tags=["Vehicle Management"])
+def vehicle_oil_status(id: int):
+    vehicle = my_garage.find_vehicle(id)
+    if vehicle is None:
+        raise HTTPException(status_code=404, detail=f"Vehicle with ID {id} could not be found.")
+    con, status = vehicle.oil_status()
+    if con:
+        return {"oil status": "Good",
+                "remaining mileage": f"{status}km"}
+    else:
+        return {"oil status": "Bad",
+                "message": "This vehicle need new engine oil"}
