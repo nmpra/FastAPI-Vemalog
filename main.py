@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Form
 from typing import Annotated
-from schema import VehicleCreate
+from schemas import VehicleCreate
 from services import GarageServices
 from models import Car, Motorcycle
 
