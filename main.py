@@ -65,12 +65,23 @@ def add_new_vehicles(payload: VehicleCreate):
             "detail": new_vehicle.get_info()}
 
 @app.delete("/vehicles/{id}")
-def delete_vehicles(id: int):
+def delete_vehicle(id: int):
     try:
         my_garage.remove_vehicle(id)
         return {"message": f"Vehicle with ID {id} succesfully removed.",
                 "status": "success"}
     except Exception as e:
-        raise HTTPException(status_code=404, detail=f"{e}")
+        raise HTTPException(status_code=404, detail=str(e))
 
-
+@app.patch("/vehicles/{id}/update_mileage")
+def update_vehicle_mileage(id: int, new_mileage: Annotated[int, Form()]):
+    vehicle = my_garage.find_vehicle(id)
+    if vehicle is None:
+        raise HTTPException(status_code=404, detail=f"Vehicle with ID {id} could not be found.")
+    try:
+        new_mil = vehicle.mileage_update(new_mileage)
+        if new_mil:
+            return {"message": "Succesfully updated vehicle mileage",
+                    "mileage": f"{vehicle._prev_mileage} => {vehicle._mileage}"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
