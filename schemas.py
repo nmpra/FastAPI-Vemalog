@@ -16,7 +16,7 @@ class VehicleCreate(VehicleBase):
     last_maintenance: int = 0
 
 # --- SCHEMA 2: Buat output (Apa yang dikirim ke User) ---
-class VehicleDetail(VehicleBase):
+class VehicleResponse(VehicleBase):
     id: int
     current_mileage: int
     last_oil_change: int
@@ -34,4 +34,12 @@ class VehicleDetail(VehicleBase):
 
 # --- SCHEMA 3: Buat Update (Khusus buat nambah KM) ---
 class MileageUpdate(BaseModel):
-    new_mileage: int = Field(ge=0)
+    current_mileage: int = Field(ge=0, alias='new_mileage')
+
+class MileageResponse(VehicleBase):
+    current_mileage: int
+    remaining_oil: int
+    remaining_maint: int
+
+    class Config:
+        from_attributes = True

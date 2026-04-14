@@ -8,7 +8,7 @@ from database import engine, get_db
 models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
-@app.post("/vehicles/", response_model=schemas.VehicleDetail)
+@app.post("/vehicles/", response_model=schemas.VehicleResponse)
 def create_vehicle(vehicle: schemas.VehicleCreate, db: Session = Depends(get_db)):
     db_vehicle = models.Vehicle(**vehicle.model_dump())
     db.add(db_vehicle)
@@ -16,9 +16,27 @@ def create_vehicle(vehicle: schemas.VehicleCreate, db: Session = Depends(get_db)
     db.refresh(db_vehicle)
     return db_vehicle
 
-@app.get("/vehicles/{vehicle_id}", response_model=schemas.VehicleDetail)
+@app.get("/vehicles/{vehicle_id}", response_model=schemas.VehicleResponse)
 def read_vehicle(vehicle_id: int, db: Session = Depends(get_db)):
     db_vehicle = db.query(models.Vehicle).get(vehicle_id)
     if not db_vehicle:
         raise HTTPException(status_code=404, detail=f"Vehicle with id {vehicle_id} could not be found")
+    return db_vehicle
+
+@app.patch("/vehicles/{vehicle_id}/mileage", response_model=schemas.MileageResponse)
+def update_vehicle_mileage(vehicle_id: int, new_mileage: schemas.MileageUpdate, db: Session = Depends(get_db)):
+    db_vehicle = db.query(models.Vehicle).get(vehicle_id)
+    if not db_vehicle:
+        raise HTTPException(status_code=404, detail=f"Vehicle with id {vehicle_id} could not be found")
+    
+    update_dict = new_mileage.model_dump(exclude_unset=True)
+
+    if update_dict["current_mileage"] <= db_vehicle.current_mileage:
+        raise HTTPException(status_code=400, detail="New mileage can not be less or same than current mileage")
+    
+    for field, value in update_dict.items():
+        setattr(db_vehicle, field, value)
+
+    db.commit()
+    db.refresh(db_vehicle)
     return db_vehicle
