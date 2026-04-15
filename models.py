@@ -22,11 +22,6 @@ class Vehicle(Base):
     @property
     def maintenance_interval(self):
         return 5000 if self.vehicle_type == "Motorcycle" else 10000
-    
-    def update_mileage(self, new_mileage: int):
-        if new_mileage <= self.current_mileage:
-            raise ValueError("Mileage baru gak boleh lebih kecil/sama, Nat!")
-        self.current_mileage = new_mileage
 
     @property
     def remaining_oil(self) -> int:
