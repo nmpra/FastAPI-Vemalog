@@ -75,3 +75,18 @@ def update_vehicle_maintenance(vehicle_id: int, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_vehicle)
     return db_vehicle
+
+@app.patch("/vehicles/{vehicle_id}/update_vehicle", response_model=schemas.VehicleResponse, tags=["Vehicle Detail"])
+def update_vehicle_data(vehicle_id: int, vehicle_data: schemas.VehicleUpdate, db: Session = Depends(get_db)):
+    db_vehicle = db.query(models.Vehicle).get(vehicle_id)
+    if not db_vehicle:
+        raise HTTPException(status_code=404, detail=f"Vehicle with id {vehicle_id} could not be found")
+    
+    update_dict = vehicle_data.model_dump(exclude_unset=True)
+
+    for field, value in update_dict.items():
+        setattr(db_vehicle, field, value)
+
+    db.commit()
+    db.refresh(db_vehicle)
+    return db_vehicle    

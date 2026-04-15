@@ -39,3 +39,10 @@ class UpdateResponse(VehicleBase):
 
     class Config:
         from_attributes = True
+
+class VehicleUpdate(BaseModel):
+    name: str = Field(min_length=3)
+    cc: int = Field(ge=50)
+    license_plate: str
+    vehicle_type: Literal["Car", "Motorcycle"]
+    transmission: Literal["Manual", "Semi Auto", "Automatic"]
