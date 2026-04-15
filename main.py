@@ -1,5 +1,7 @@
+
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
+from typing import List
 
 import schemas
 import models
@@ -17,11 +19,15 @@ def create_vehicle(vehicle: schemas.VehicleCreate, db: Session = Depends(get_db)
     return db_vehicle
 
 @app.get("/vehicles/{vehicle_id}", response_model=schemas.VehicleResponse, tags=["Vehicles"])
-def read_vehicle(vehicle_id: int, db: Session = Depends(get_db)):
+def get_vehicle(vehicle_id: int, db: Session = Depends(get_db)):
     db_vehicle = db.query(models.Vehicle).get(vehicle_id)
     if not db_vehicle:
         raise HTTPException(status_code=404, detail=f"Vehicle with id {vehicle_id} could not be found")
     return db_vehicle
+
+@app.get("/vehicles/", response_model=List[schemas.VehicleResponse], tags=["Vehicles"])
+def get_all_vehicles(db: Session = Depends(get_db)):
+    return db.query(models.Vehicle).all()
 
 @app.delete("/vehicles/{vehicle_id}", tags=["Vehicles"])
 def delete_vehicle(vehicle_id: int, db: Session = Depends(get_db)):
