@@ -1,20 +1,33 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Literal
 
-class VehicleBase(BaseModel):
+class UserBase(BaseModel):
     name: str = Field(min_length=3)
+
+class UserCreate(UserBase):
+    pass
+
+class UserResponse(UserBase):
+    id: int
+    model_config = ConfigDict(from_attributes=True)
+
+class VehicleBase(BaseModel):
+    brand: str = Field(min_length=3)
+    model: str = Field(min_length=3)
     cc: int = Field(ge=50)
     license_plate: str
     vehicle_type: Literal["Car", "Motorcycle"]
     transmission: Literal["Manual", "Semi Auto", "Automatic"]
 
 class VehicleCreate(VehicleBase):
+    user_id: int
     current_mileage: int = 0
     last_oil_change: int = 0
     last_maintenance: int = 0
 
 class VehicleResponse(VehicleBase):
     id: int
+    user: UserResponse
     current_mileage: int
     last_oil_change: int
     last_maintenance: int
@@ -24,8 +37,7 @@ class VehicleResponse(VehicleBase):
     remaining_oil: int
     remaining_maint: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class MileageUpdate(BaseModel):
     current_mileage: int = Field(ge=0, alias='new_mileage')
@@ -37,11 +49,11 @@ class UpdateResponse(VehicleBase):
     remaining_oil: int
     remaining_maint: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class VehicleUpdate(BaseModel):
-    name: str = Field(min_length=3)
+    brand: str = Field(min_length=3)
+    model: str = Field(min_length=3)
     cc: int = Field(ge=50)
     license_plate: str
     vehicle_type: Literal["Car", "Motorcycle"]
