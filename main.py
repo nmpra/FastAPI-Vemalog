@@ -41,6 +41,16 @@ def get_all_user(db: db_dependency):
     users = db.execute(select(models.User)).scalars().all()
     return users
 
+@app.get("/users/{user_id}/vehicles", response_model=list[schemas.VehicleResponse], tags=["Users"])
+def get_user_vehicles(user_id: int, db: db_dependency):
+    query = db.execute(select(models.User).where(models.User.id == user_id))
+    existing_user = query.scalars().first()
+    if not existing_user:
+        raise HTTPException(status_code=404, detail=f"User with ID {user_id} could not be found")
+    query = db.execute(select(models.Vehicle).where(models.Vehicle.user_id == user_id))
+    vehicles = query.scalars().all()
+    return vehicles
+
 @app.delete("/users/{user_id}", tags=["Users"])
 def delete_user(user_id: int, db: db_dependency):
     query = db.execute(select(models.User).where(models.User.id == user_id))
