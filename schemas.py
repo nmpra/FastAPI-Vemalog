@@ -39,9 +39,6 @@ class VehicleResponse(VehicleBase):
 
     model_config = ConfigDict(from_attributes=True)
 
-class MileageUpdate(BaseModel):
-    current_mileage: int = Field(ge=0, alias='new_mileage')
-
 class UpdateResponse(VehicleBase):
     current_mileage: int
     last_oil_change: int = 0
@@ -52,9 +49,12 @@ class UpdateResponse(VehicleBase):
     model_config = ConfigDict(from_attributes=True)
 
 class VehicleUpdate(BaseModel):
-    brand: str = Field(min_length=3)
-    model: str = Field(min_length=3)
-    cc: int = Field(ge=50)
-    license_plate: str
-    vehicle_type: Literal["Car", "Motorcycle"]
-    transmission: Literal["Manual", "Semi Auto", "Automatic"]
+    brand: str | None = Field(default=None, min_length=3)
+    model: str | None = Field(default=None, min_length=3)
+    cc: int | None = Field(default=None, ge=50)
+    license_plate: str | None = None
+    vehicle_type: Literal["Car", "Motorcycle"] | None = None
+    transmission: Literal["Manual", "Semi Auto", "Automatic"] | None = None
+    current_mileage: int | None = None
+    last_oil_change: int | None = None
+    last_maintenance: int | None = None
