@@ -1,7 +1,7 @@
 # Service
 
+
 class GarageServices:
-    
     def __init__(self):
         self.gid = 1
         self._vehicles = {}

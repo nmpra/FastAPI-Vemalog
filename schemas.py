@@ -1,15 +1,20 @@
-from pydantic import BaseModel, Field, ConfigDict
 from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, Field
+
 
 class UserBase(BaseModel):
     name: str = Field(min_length=3)
 
+
 class UserCreate(UserBase):
     pass
+
 
 class UserResponse(UserBase):
     id: int
     model_config = ConfigDict(from_attributes=True)
+
 
 class VehicleBase(BaseModel):
     brand: str = Field(min_length=3)
@@ -19,11 +24,13 @@ class VehicleBase(BaseModel):
     vehicle_type: Literal["Car", "Motorcycle"]
     transmission: Literal["Manual", "Semi Auto", "Automatic"]
 
+
 class VehicleCreate(VehicleBase):
     user_id: int
     current_mileage: int = 0
     last_oil_change: int = 0
     last_maintenance: int = 0
+
 
 class VehicleResponse(VehicleBase):
     id: int
@@ -31,13 +38,14 @@ class VehicleResponse(VehicleBase):
     current_mileage: int
     last_oil_change: int
     last_maintenance: int
-    
+
     oil_change_interval: int
     maintenance_interval: int
     remaining_oil: int
     remaining_maint: int
 
     model_config = ConfigDict(from_attributes=True)
+
 
 class UpdateResponse(VehicleBase):
     current_mileage: int
@@ -47,6 +55,7 @@ class UpdateResponse(VehicleBase):
     remaining_maint: int
 
     model_config = ConfigDict(from_attributes=True)
+
 
 class VehicleUpdate(BaseModel):
     brand: str | None = Field(default=None, min_length=3)
