@@ -12,8 +12,8 @@ db_dependency = Annotated[Session, Depends(get_db)]
 
 app = FastAPI()
 
-app.include_router(users_router)
-app.include_router(vehicles_router)
+app.include_router(users_router, prefix="/api")
+app.include_router(vehicles_router, prefix="/api")
 
 
 @app.get("/")

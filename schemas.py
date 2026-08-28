@@ -8,7 +8,12 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
-    pass
+    password: str = Field(min_length=8)
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
 
 
 class UserResponse(UserBase):

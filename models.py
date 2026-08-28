@@ -15,6 +15,8 @@ class User(Base):
 
     # Relationship One to Many ke Vehicle karena make list
     vehicles: Mapped[list[Vehicle]] = relationship(back_populates="user")
+    # Buat password hash
+    password_hash: Mapped[str] = mapped_column(String(200), nullable=False)
 
 
 class Vehicle(Base):

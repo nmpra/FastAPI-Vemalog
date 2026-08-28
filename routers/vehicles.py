@@ -5,8 +5,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 import models
-import schemas
 from database import get_db
+from schemas import VehicleCreate, VehicleResponse
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
@@ -15,10 +15,10 @@ router = APIRouter(prefix="/vehicles", tags=["Vehicles"])
 
 @router.post(
     "",
-    response_model=schemas.VehicleResponse,
+    response_model=VehicleResponse,
     status_code=201,
 )
-def create_vehicle(vehicle: schemas.VehicleCreate, db: db_dependency):
+def create_vehicle(vehicle: VehicleCreate, db: db_dependency):
     query = db.execute(
         select(models.User).where(models.User.id == vehicle.user_id)
     ).scalar_one_or_none()
@@ -34,7 +34,7 @@ def create_vehicle(vehicle: schemas.VehicleCreate, db: db_dependency):
     return db_vehicle
 
 
-@router.get("/{vehicle_id}", response_model=schemas.VehicleResponse)
+@router.get("/{vehicle_id}", response_model=VehicleResponse)
 def get_vehicle(vehicle_id: int, db: db_dependency):
     db_vehicle = db.get(models.Vehicle, vehicle_id)
     if not db_vehicle:
@@ -44,7 +44,7 @@ def get_vehicle(vehicle_id: int, db: db_dependency):
     return db_vehicle
 
 
-@router.get("/", response_model=list[schemas.VehicleResponse])
+@router.get("/", response_model=list[VehicleResponse])
 def get_all_vehicles(db: db_dependency):
     vehicles = db.execute(select(models.Vehicle)).scalars().all()
     return vehicles
