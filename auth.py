@@ -1,14 +1,46 @@
 from datetime import UTC, datetime, timedelta
+from typing import Annotated
 
 import jwt
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from pwdlib import PasswordHash
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 
+import models
 from config import settings
+from database import get_db
 
 password_hash = PasswordHash.recommended()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/users/token")
+
+
+# Fungsi ambil data user saat ini
+def get_current_user(
+    token: Annotated[str, Depends(oauth2_scheme)],
+    db: Annotated[Session, Depends(get_db)],
+) -> models.User:
+    credentials_exception = HTTPException(
+        status_code=401,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    user_id = verify_access_token(token)
+    if user_id is None:
+        raise credentials_exception
+
+    query = db.execute(select(models.User).where(models.User.id == int(user_id)))
+    user = query.scalars().first()
+
+    if user is None:
+        raise credentials_exception
+    return user
+
+
+user_dependency = Annotated[models.User, Depends(get_current_user)]
 
 
 def hash_password(password: str) -> str:
