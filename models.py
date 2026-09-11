@@ -60,3 +60,27 @@ class Vehicle(Base):
     def remaining_maint(self) -> int:
         used = self.current_mileage - self.last_maintenance
         return max(0, self.maintenance_interval - used)
+
+    @property
+    def oil_status(self) -> str:
+        if self.remaining_oil == 0:
+            return "NEEDS_SERVICE"
+        if self.remaining_oil <= 1000:
+            return "WARNING"
+        return "OK"
+
+    @property
+    def maint_status(self) -> str:
+        if self.remaining_maint == 0:
+            return "NEEDS_SERVICE"
+        if self.remaining_maint <= 1500:
+            return "WARNING"
+        return "OK"
+
+    @property
+    def overall_health(self) -> str:
+        if self.oil_status == "NEEDS_SERVICE" or self.maint_status == "NEEDS_SERVICE":
+            return "BAD"
+        if self.oil_status == "WARNING" or self.maint_status == "WARNING":
+            return "WARNING"
+        return "GOOD"

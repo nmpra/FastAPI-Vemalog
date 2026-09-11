@@ -48,6 +48,10 @@ class VehicleResponse(VehicleBase):
     remaining_oil: int
     remaining_maint: int
 
+    oil_status: str
+    maint_status: str
+    overall_health: str
+
     model_config = ConfigDict(from_attributes=True)
 
 
