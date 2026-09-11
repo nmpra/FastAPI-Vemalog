@@ -10,14 +10,14 @@ def vehicle_update_validator(vehicle, updates):
             )
 
     if "last_oil_change" in updates:
-        if updates["last_oil_change"] <= vehicle.last_oil_change:
+        if updates["last_oil_change"] <= vehicle.current_mileage:
             raise HTTPException(
                 status_code=400,
                 detail="Last oil change mileage can not be less or same than current mileage",
             )
 
     if "last_maintenance" in updates:
-        if updates["last_maintenance"] <= vehicle.last_maintenance:
+        if updates["last_maintenance"] <= vehicle.current_mileage:
             raise HTTPException(
                 status_code=400,
                 detail="Last maintenance mileage can not be less or same than current mileage",
