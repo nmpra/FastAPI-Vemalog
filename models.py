@@ -14,7 +14,9 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(25))
 
     # Relationship One to Many ke Vehicle karena make list
-    vehicles: Mapped[list[Vehicle]] = relationship(back_populates="user")
+    vehicles: Mapped[list[Vehicle]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
     # Buat password hash
     password_hash: Mapped[str] = mapped_column(String(200), nullable=False)
 
@@ -29,9 +31,7 @@ class Vehicle(Base):
 
     # Relationship Many to One ke User dan ga make list karena satu kendaraan hanya boleh punya satu owner
 
-    user: Mapped[User] = relationship(
-        back_populates="vehicles", cascade="all, delete-orphan"
-    )
+    user: Mapped[User] = relationship(back_populates="vehicles")
 
     brand: Mapped[str] = mapped_column(String(15))
     model: Mapped[str] = mapped_column(String(15))
