@@ -99,26 +99,14 @@ def get_user_vehicle(vehicle_id: int, current_user: user_dependency, db: db_depe
 
 @router.get("/me/vehicles", response_model=list[VehicleResponse])
 def get_user_vehicles(current_user: user_dependency, db: db_dependency):
-    query = db.execute(select(models.User).where(models.User.id == current_user.id))
-    existing_user = query.scalars().first()
-    if not existing_user:
-        raise HTTPException(
-            status_code=404, detail=f"User with ID {current_user.id} could not be found"
-        )
-    return existing_user.vehicles
+    return current_user.vehicles
 
 
 @router.delete("/me")
 def delete_user(current_user: user_dependency, db: db_dependency):
-    query = db.execute(select(models.User).where(models.User.id == current_user.id))
-    existing_user = query.scalars().first()
-    if not existing_user:
-        raise HTTPException(
-            status_code=404, detail=f"User with ID {current_user.id} could not be found"
-        )
-    db.delete(existing_user)
+    db.delete(current_user)
     db.commit()
-    return {"messages": f"user {existing_user.name} was succesfully deleted"}
+    return {"messages": f"user {current_user.name} was succesfully deleted"}
 
 
 @router.patch(
