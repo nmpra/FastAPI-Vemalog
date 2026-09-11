@@ -1,4 +1,4 @@
-# Import biar gaperlu make quotes di relationship dan biar python ga protes nyari referensinya
+# Biar type hint relationship bisa merujuk ke class yang didefinisikan setelahnya
 from __future__ import annotations
 
 from sqlalchemy import ForeignKey, Integer, String
@@ -17,7 +17,6 @@ class User(Base):
     vehicles: Mapped[list[Vehicle]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
-    # Buat password hash
     password_hash: Mapped[str] = mapped_column(String(200), nullable=False)
 
 

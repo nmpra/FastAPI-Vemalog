@@ -47,5 +47,5 @@ def delete_vehicle(current_user: user_dependency, vehicle_id: int, db: db_depend
     db.delete(vehicle)
     db.commit()
     return {
-        "messages": f"vehicle {vehicle.brand} {vehicle.model} was succesfully deleted"
+        "message": f"vehicle {vehicle.brand} {vehicle.model} was successfully deleted"
     }

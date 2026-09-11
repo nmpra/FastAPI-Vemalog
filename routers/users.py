@@ -37,7 +37,9 @@ def create_user(user: UserCreate, db: db_dependency):
     )
     existing_user = query.scalars().first()
     if existing_user:
-        raise HTTPException(status_code=400, detail="User with that name already exist")
+        raise HTTPException(
+            status_code=400, detail="User with that name already exists"
+        )
 
     new_user = models.User(name=user.name, password_hash=hash_password(user.password))
     db.add(new_user)
@@ -107,7 +109,7 @@ def get_user_vehicles(current_user: user_dependency, db: db_dependency):
 def delete_user(current_user: user_dependency, db: db_dependency):
     db.delete(current_user)
     db.commit()
-    return {"messages": f"user {current_user.name} was succesfully deleted"}
+    return {"message": f"user {current_user.name} was successfully deleted"}
 
 
 @router.patch(

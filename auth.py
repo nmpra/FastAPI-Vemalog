@@ -58,7 +58,6 @@ def verify_access_token(token: str) -> str | None:
         return payload.get("sub")
 
 
-# Fungsi ambil data user saat ini
 def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
     db: Annotated[Session, Depends(get_db)],

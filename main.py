@@ -1,14 +1,10 @@
-from typing import Annotated
+from fastapi import FastAPI
 
-from fastapi import Depends, FastAPI
-from sqlalchemy.orm import Session
-
-from database import Base, engine, get_db
-from routers.__init__ import users_router, vehicles_router
+from database import Base, engine
+from routers import users_router, vehicles_router
 
 Base.metadata.create_all(bind=engine)
 
-db_dependency = Annotated[Session, Depends(get_db)]
 
 app = FastAPI()
 
@@ -17,5 +13,5 @@ app.include_router(vehicles_router, prefix="/api")
 
 
 @app.get("/")
-def run():
+def root():
     return {"message": "woi"}
