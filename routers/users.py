@@ -10,6 +10,7 @@ import models
 from auth import create_access_token, get_current_user, hash_password, verify_password
 from config import settings
 from database import get_db
+from helper import vehicle_update_validator
 from schemas import (
     Token,
     UpdateResponse,
@@ -132,23 +133,7 @@ def update_vehicle_data(
 
     update_dict = vehicle_update.model_dump(exclude_unset=True)
 
-    if update_dict["current_mileage"] <= vehicle.current_mileage:
-        raise HTTPException(
-            status_code=400,
-            detail="New mileage can not be less or same than current mileage",
-        )
-
-    elif update_dict["last_oil_change"] < vehicle.current_mileage:
-        raise HTTPException(
-            status_code=400,
-            detail="Last oil change mileage can not be less than current mileage",
-        )
-
-    elif update_dict["last_maintenance"] < vehicle.current_mileage:
-        raise HTTPException(
-            status_code=400,
-            detail="Last maintenance mileage can not be less than current mileage",
-        )
+    vehicle_update_validator(vehicle, update_dict)
 
     for field, value in update_dict.items():
         setattr(vehicle, field, value)
