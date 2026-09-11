@@ -28,12 +28,15 @@ class Vehicle(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
     # Relationship Many to One ke User dan ga make list karena satu kendaraan hanya boleh punya satu owner
-    user: Mapped[User] = relationship(back_populates="vehicles")
+
+    user: Mapped[User] = relationship(
+        back_populates="vehicles", cascade="all, delete-orphan"
+    )
 
     brand: Mapped[str] = mapped_column(String(15))
     model: Mapped[str] = mapped_column(String(15))
     cc: Mapped[int] = mapped_column(Integer)
-    license_plate: Mapped[str] = mapped_column(String(10))
+    license_plate: Mapped[str] = mapped_column(String(15))
     vehicle_type: Mapped[str] = mapped_column(String(20))
     transmission: Mapped[str] = mapped_column(String(20))
     current_mileage: Mapped[int] = mapped_column(Integer, default=0)
