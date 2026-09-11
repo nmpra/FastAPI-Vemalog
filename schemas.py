@@ -31,7 +31,6 @@ class VehicleBase(BaseModel):
 
 
 class VehicleCreate(VehicleBase):
-    user_id: int
     current_mileage: int = 0
     last_oil_change: int = 0
     last_maintenance: int = 0

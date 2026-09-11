@@ -7,13 +7,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 import models
-from auth import (
-    create_access_token,
-    hash_password,
-    oauth2_scheme,
-    verify_access_token,
-    verify_password,
-)
+from auth import create_access_token, get_current_user, hash_password, verify_password
 from config import settings
 from database import get_db
 from schemas import (
@@ -26,6 +20,9 @@ from schemas import (
 )
 
 db_dependency = Annotated[Session, Depends(get_db)]
+
+user_dependency = Annotated[models.User, Depends(get_current_user)]
+
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -79,77 +76,45 @@ def login_for_access_token(
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.get("/me", response_model=UserResponse)
-def get_current_user(
-    token: Annotated[str, Depends(oauth2_scheme)],
-    db: db_dependency,
-) -> models.User:
-    credentials_exception = HTTPException(
-        status_code=401,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-
-    # Ekstrak user_id dari token (payload 'sub')
-    user_id = verify_access_token(token)
-    if user_id is None:
-        raise credentials_exception
-
-    # Ambil user dari database berdasarkan ID
-    query = db.execute(select(models.User).where(models.User.id == int(user_id)))
-    user = query.scalars().first()
-
-    if user is None:
-        raise credentials_exception
-
-    return user
-
-
-# Type alias biar gampang dipake di endpoint mana pun
-user_dependency = Annotated[models.User, Depends(get_current_user)]
-
-
 # 2. Endpoint /me (profil user yang lagi login)
 @router.get("/me", response_model=UserResponse)
 def read_current_user(current_user: user_dependency):
     return current_user
 
 
-@router.get("/{user_id}", response_model=UserResponse)
-def get_user(user_id: int, db: db_dependency):
-    query = db.execute(select(models.User).where(models.User.id == user_id))
-    user = query.scalars().first()
-    if not user:
-        raise HTTPException(
-            status_code=400, detail=f"User with ID {user_id} could not be found"
+@router.get("/me/vehicles/{vehicle_id}", response_model=VehicleResponse)
+def get_user_vehicle(vehicle_id: int, current_user: user_dependency, db: db_dependency):
+    query = db.execute(
+        select(models.Vehicle).where(
+            models.Vehicle.user_id == current_user.id, models.Vehicle.id == vehicle_id
         )
-    return user
+    )
+    vehicle = query.scalars().first()
+    if not vehicle:
+        raise HTTPException(
+            status_code=404, detail=f"Vehicle with ID {vehicle_id} could not be found"
+        )
+    return vehicle
 
 
-@router.get("", response_model=list[UserResponse])
-def get_all_user(db: db_dependency):
-    users = db.execute(select(models.User)).scalars().all()
-    return users
-
-
-@router.get("/{user_id}/vehicles", response_model=list[VehicleResponse])
-def get_user_vehicles(user_id: int, db: db_dependency):
-    query = db.execute(select(models.User).where(models.User.id == user_id))
+@router.get("/me/vehicles", response_model=list[VehicleResponse])
+def get_user_vehicles(current_user: user_dependency, db: db_dependency):
+    query = db.execute(select(models.User).where(models.User.id == current_user.id))
     existing_user = query.scalars().first()
     if not existing_user:
         raise HTTPException(
-            status_code=404, detail=f"User with ID {user_id} could not be found"
+            status_code=404, detail=f"User with ID {current_user.id} could not be found"
         )
     return existing_user.vehicles
 
 
-@router.delete("/{user_id}")
-def delete_user(user_id: int, db: db_dependency):
-    query = db.execute(select(models.User).where(models.User.id == user_id))
+@router.delete("/me")
+def delete_user(current_user: user_dependency, db: db_dependency):
+    query = db.execute(select(models.User).where(models.User.id == current_user.id))
     existing_user = query.scalars().first()
     if not existing_user:
         raise HTTPException(
-            status_code=404, detail=f"User with ID {user_id} could not be found"
+            status_code=404, detail=f"User with ID {current_user.id} could not be found"
         )
     db.delete(existing_user)
     db.commit()
@@ -157,25 +122,18 @@ def delete_user(user_id: int, db: db_dependency):
 
 
 @router.patch(
-    "/{user_id}/vehicles/{vehicle_id}/",
+    "/me/vehicles/{vehicle_id}/",
     response_model=UpdateResponse,
 )
 def update_vehicle_data(
-    user_id: int,
+    current_user: user_dependency,
     vehicle_id: int,
     vehicle_update: VehicleUpdate,
     db: db_dependency,
 ):
-    query = db.execute(select(models.User).where(models.User.id == user_id))
-    user = query.scalars().first()
-    if not user:
-        raise HTTPException(
-            status_code=404, detail=f"User with ID {user_id} could not be found"
-        )
-
     query = db.execute(
         select(models.Vehicle).where(
-            models.Vehicle.user_id == user_id, models.Vehicle.id == vehicle_id
+            models.Vehicle.user_id == current_user.id, models.Vehicle.id == vehicle_id
         )
     )
     vehicle = query.scalars().first()
